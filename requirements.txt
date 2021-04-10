@@ -1,4 +1,4 @@
 Flask==1.1.2
 gensim==4.0.1
 Janome==0.4.1
-tensorflow==2.5.0rc0
+tensorflow-cpu==2.5.0rc0
