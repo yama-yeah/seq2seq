@@ -1,4 +1,14 @@
+import sys
+import os 
+/*
+import pathlib
+
+current_dir = str(pathlib.Path(__file__).resolve().parent)
+sys.path.append(current_dir)
+*/
+
 from chat_ai import Network
+
 def api(text):
     net=Network()
     net.load_datas()

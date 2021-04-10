@@ -24,13 +24,15 @@ from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow.keras.backend as K
 
 
+import pathlib
 
+current_dir = str(pathlib.Path(__file__).resolve().parent)
 
 class Network:
     batch_size = 32  # Batch size for training.
     epochs = 64  # Number of epochs to train for.
     latent_dim = 512  # Latent dimensionality of the encoding space.
-    SAVE_PATH = 'weight/'
+    SAVE_PATH = current_dir+'/weight/'
     MAX = 256
     # Path to the data txt file on disk.
 

@@ -2,8 +2,13 @@ from gensim.models import word2vec
 import random
 import morph
 import numpy as np
-MODEL = 'weight/w2v_model.model'
-WAKATI = 'wakati/wakati_unk.txt'
+import pathlib
+
+import os 
+
+current_dir = str(pathlib.Path(__file__).resolve().parent)
+MODEL = current_dir+'/weight/w2v_model.model'
+WAKATI = current_dir+'/wakati/wakati_unk.txt'
 
 
 class W2v:
@@ -11,7 +16,7 @@ class W2v:
         self.model = word2vec.Word2Vec.load(MODEL)
 
     def load_w2v(self, word):
-        model = word2vec.Word2Vec.load('w2v.model')
+        model = word2vec.Word2Vec.load(PATH+'/w2v.model')
         try:
             # print('w2v')
             similar_words = model.most_similar(positive=[word])

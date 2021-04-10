@@ -1,5 +1,10 @@
 from flask import Flask, jsonify, abort, make_response
 import os
+import sys
+
+PATH=os.path.abspath('') 
+sys.path.append(PATH)
+
 import responder
 
 app = Flask(__name__)

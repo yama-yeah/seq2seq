@@ -3,7 +3,9 @@ import pickle
 import copy
 import morph
 from w2v import W2v
+import pathlib
 
+current_dir = str(pathlib.Path(__file__).resolve().parent)
 
 class Chat_data:
     BATCH_SIZE = 1024
@@ -123,11 +125,11 @@ class Chat_data:
         datas['matrix'] = self.matrix
         datas['size'] = self.w2v_size
         # datas['len']=[self.num_encoder_tokens,self.num_tokens]
-        with open('pickle/chat.pickle', mode='wb') as f:
+        with open(current_dir+'/pickle/chat.pickle', mode='wb') as f:
             pickle.dump(datas, f, protocol=2)
 
     def load(self):
-        with open('pickle/chat.pickle', mode='rb') as f:
+        with open(current_dir+'/pickle/chat.pickle', mode='rb') as f:
             datas = pickle.load(f)
         self.num_tokens = datas['tokens']
         self.index, self.reverse_index = datas['dics']
