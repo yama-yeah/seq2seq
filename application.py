@@ -11,8 +11,8 @@ import responder
 app = Flask(__name__)
 
 @app.route("/")
-def not_found():
-    return jsonify("404")
+def hello():
+    return jsonify('hello')
 
 @app.route("/<key>", methods=["GET"])
 def main(key):
@@ -20,5 +20,25 @@ def main(key):
         return jsonify(responder.response(key))
     except:
         return jsonify(key+'?')
+
+@app.errorhandler(NotFound)
+def page_not_found_handler(e: HTTPException):
+    return jsonify('404')
+
+
+@app.errorhandler(Unauthorized)
+def unauthorized_handler(e: HTTPException):
+    return jsonify('401')
+
+
+@app.errorhandler(Forbidden)
+def forbidden_handler(e: HTTPException):
+    return jsonify('403')
+
+
+@app.errorhandler(RequestTimeout)
+def request_timeout_handler(e: HTTPException):
+    return jsonify('408')
+
 if __name__ == "__main__":
     app.run()
