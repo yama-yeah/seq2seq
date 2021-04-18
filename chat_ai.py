@@ -29,7 +29,7 @@ import pathlib
 current_dir = str(pathlib.Path(__file__).resolve().parent)
 
 class Network:
-    batch_size = 32  # Batch size for training.
+    batch_size = 8  # Batch size for training.
     epochs = 64  # Number of epochs to train for.
     latent_dim = 512  # Latent dimensionality of the encoding space.
     SAVE_PATH = current_dir+'/weight/'
@@ -64,30 +64,30 @@ class Network:
         self.embedding = Embedding(input_dim=(
             self.num_tokens), output_dim=self.w2v_size, weights=[self.matrix], mask_zero=True,trainable=False)
         # 埋め込み、単語を128次元ベクトル化 ０をパンディング
-        self.encoder_normalization = BatchNormalization(
-            name='encoder_normalization')
         e_inputs = self.embedding(self.encoder_inputs)
-        e_inputs = self.encoder_normalization(e_inputs)
         e_inputs = Dropout(rate=0.2)(e_inputs)
         encoder = Bidirectional(LSTM(int(self.latent_dim/2), return_state=True,return_sequences=True,dropout=0.5,recurrent_dropout=0.5),name="Bidirectional_encoder_LSTM")
         # latent_dim 出力の次元数．
         # 真理値．出力とともに，最後の状態を返すかどうか．
         encoder_outputs, f_h, f_c,b_h,b_c = encoder(e_inputs)
+        encoder_outputs=BatchNormalization()(encoder_outputs)
+        f_h=BatchNormalization()(f_h)
+        f_c=BatchNormalization()(f_c)
+        b_h=BatchNormalization()(b_h)
+        b_c=BatchNormalization()(b_c)
         state_h=Concatenate(name="state_h_Concat")([f_h,b_h])
         state_c=Concatenate(name='state_c_Concat')([f_c,b_c])
         # encoder_outputsは使わない
         self.encoder_states = [state_h, state_c]
         self.normal_out_encoder = [encoder_outputs, state_h, state_c]
         self.decoder_inputs = Input(shape=(None,), name='decoder_inputs')
-        self.decoder_normalization = BatchNormalization(
-            name='decoder_nomalization')
         d_inputs = self.embedding(self.decoder_inputs)
-        d_inputs = self.decoder_normalization(d_inputs)
         d_inputs = Dropout(rate=0.2)(d_inputs)
         self.decoder_lstm = LSTM(
             self.latent_dim, return_sequences=True, return_state=True,dropout=0.5,recurrent_dropout=0.5,name='decoder_LSTM')
         decoder_outputs, _, _ = self.decoder_lstm(d_inputs,
                                                   initial_state=self.encoder_states)
+        decoder_outputs=BatchNormalization()(decoder_outputs)
         #self.attention_layer=sa(self.latent_dim)
         #decoder_outputs=self.attention_layer(decoder_outputs,encoder_outputs)
         self.attention_layer=Attention(self.latent_dim)
@@ -122,9 +122,9 @@ class Network:
         encoder_outputs = Input((None,None), name='encoder_outputs')
         decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
         d_inputs = self.embedding(self.decoder_inputs)
-        d_inputs = self.decoder_normalization(d_inputs)
         decoder_outputs, state_h, state_c = self.decoder_lstm(
             d_inputs, initial_state=decoder_states_inputs)
+        decoder_outputs=BatchNormalization()(decoder_outputs)
         decoder_states = [state_h, state_c]
         a_w = self.attention_layer([decoder_outputs,encoder_outputs])
         decoder_outputs = self.concat([decoder_outputs,a_w])
@@ -223,16 +223,18 @@ class Network:
 
 
 if __name__ == "__main__":
+    
     net = Network()
     net.load_datas()
+    net.dataset.load_file('dataset/chat.txt')
     model = net.create_model()
     
     net.draw_model(model,'study')
     net.draw_model(net.encoder,'encoder')
     net.draw_model(net.decoder,'decoder')
     
-    net.load_w(model)
-    """
+    #net.load_w(model)
+
     for i in range(int(82737*95/100/net.dataset.BATCH_SIZE)):
         try:
             net.load_train(1+i, '\t')
@@ -242,7 +244,6 @@ if __name__ == "__main__":
         except:
             pass
             
-    """
     """
     for i in range(5):
         try:
